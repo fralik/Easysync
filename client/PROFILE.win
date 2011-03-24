@@ -1,0 +1,13 @@
+﻿# Unison preferences
+fastcheck = true
+group = true
+label = Your description goes here
+owner = true
+prefer = newer
+silent = true
+sshargs = -C
+sshcmd = ssh2plink.bat
+times = true
+# Change these lines:
+root = D:\sync_dir
+root = ssh://user@server//data/sync_dir

@@ -1,0 +1,85 @@
+#! /bin/sh
+#
+### BEGIN INIT INFO
+# Provides:          easysync-server
+# Required-Start:    $syslog $local_fs
+# Required-Stop:     $syslog $local_fs
+# Should-Start:      dbus avahi
+# Should-Stop:       dbus avahi
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: a service that provides Dropbox-like synchronization
+### END INIT INFO
+
+# Author: Vadim Frolov, fralik@gmail.com
+# /etc/init.d/easysync-server start and stop easysync-server daemon 
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/local/bin/easysync-server
+NAME=easysync-server
+DESC="a service that provides Dropbox-like synchronization"
+LOGFILE=/var/log/syslog
+
+test -x $DAEMON || exit 0
+
+RUN=yes
+RUN_AS_USER=root
+
+if [ "x$RUN" != "xyes" ] ; then
+    exit 0
+fi
+
+DAEMON_OPTS="-a $RUN_AS_USER"
+
+set -e
+
+case "$1" in
+  start)
+	echo -n "Starting $NAME daemon"
+	su $RUN_AS_USER -c "/usr/local/bin/easysync-server"
+	echo "."; echo "easysync-server started on `date`" >> $LOGFILE
+	
+	#echo `ps -fe | grep "/usr/bin/easysync-server" | grep -v grep | cut -d' ' -f7` > /var/run/$NAME.pid
+	echo `pidof easysync-server` > /var/run/$NAME.pid
+	;;
+  stop)
+	echo -n "Stopping $NAME daemon"
+	#`killall easysync-server`
+	su $RUN_AS_USER -c "/usr/local/bin/easysync-server -t"
+	rm /var/run/$NAME.pid
+	echo "."; echo "easysync-server stopped on `date`" >> $LOGFILE
+	;;
+  force-reload)
+	# check whether $DAEMON is running. If so, restart
+	start-stop-daemon --stop --test --quiet --pidfile \
+		/var/run/$NAME.pid --exec $DAEMON \
+	&& $0 restart \
+	|| exit 0
+	;;
+  restart)
+	echo -n "Restarting $DESC: "
+	start-stop-daemon --stop --quiet --pidfile \
+		/var/run/$NAME.pid --exec $DAEMON
+	sleep 1
+	start-stop-daemon --start --quiet --pidfile \
+		/var/run/$NAME.pid --exec $DAEMON -- $DAEMON_OPTS
+	echo "$NAME."
+	;;
+  status)
+	su $RUN_AS_USER -c "/usr/local/bin/easysync-server -v"
+	if [ -s /var/run/$NAME.pid ]; then
+        	echo "$NAME is running as PID `cat /var/run/$NAME.pid`."
+                exit 0
+        else
+           	echo "$NAME not running."
+           	exit 1
+        fi
+	;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|force-reload}" >&2
+	exit 1
+	;;
+esac
+
+exit 0
