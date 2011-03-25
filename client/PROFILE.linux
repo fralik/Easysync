@@ -4,7 +4,8 @@ group = true
 label = Your description goes here
 owner = true
 prefer = newer
-root = /home/<user>/unison_sync
-root = ssh://user@server//data/sync_dir
 silent = true
 sshargs = -C
+# Change tese lines:
+root = /home/<user>/unison_sync
+root = ssh://user@server//data/sync_dir
