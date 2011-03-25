@@ -6,7 +6,7 @@ A client-server Qt-based application that provides automated file synchronisatio
 Description
 -----------
 
-We all know Dropbox and how it changed our lives. There’s also plenty of other similar services and you often tend to use more than just one. While the individual pricing plans are affordable, it can get pretty upsetting when all the bills arrive in the end of the month. So if one already owns a personal server why not to use it?
+We all know Dropbox and how it changed our lives. There's also plenty of other similar services and you often tend to use more than just one. While the individual pricing plans are affordable, it can get pretty upsetting when all the bills arrive in the end of the month. So if one already owns a personal server why not to use it?
 
 I was recently playing around with Unison and its command line interface and decided to write a wrapper around these commands. Easysync is what I came up with. 
 
@@ -14,14 +14,14 @@ The server part of Easysync handles client connections and propagates sync signa
 
 The client part handles server connection and synchronisation process. Synchronisation process is based solely on Unison and it is no more than execution of a command "unison <profile_name>", where <profile_name> is the name of a Unison profile. This means that before running the client, user should properly setup Unison and test that it runs smoothly (this part makes Easysync really not so easy, but this might change in future releases).
 
-**Please note, that current version was done just to prove the concept. There’s still room for improvement.**
+**Please note, that current version was done just to prove the concept. There's still room for improvement.**
 
 Client side
 -----------
 
-The client side is a GUI-based piece of software with Windows and Linux versions, though the realisation is a little different between the two OSs. As a programmer I would like system API (or framework API) to handle much of the work. In this particular case, I would like to provide only the path of watched directory and be notified about changes in the tree of this directory. Unfortunately this is not how Qt works. Qt uses QFileSystemWatcher class that is not able to track changes in subfolders. However, there’s a way around it in Windows: a function called [FindFirstChangeNotification](http://msdn.microsoft.com/en-us/library/aa364417(v=vs.85).aspx) can monitor directory trees. Easysync client contains modified version of QFileSystemWatcher, called MFileSystemWatcher. All the related files are found in *qt* folder. The changes to QFileSystemWatcher are done not only to receive signals about changes in subfolders, but also to track changes of files inside the directory tree.
+The client side is a GUI-based piece of software with Windows and Linux versions, though the realisation is a little different between the two OSs. As a programmer I would like system API (or framework API) to handle much of the work. In this particular case, I would like to provide only the path of watched directory and be notified about changes in the tree of this directory. Unfortunately this is not how Qt works. Qt uses QFileSystemWatcher class that is not able to track changes in subfolders. However, there's a way around it in Windows: a function called [FindFirstChangeNotification](http://msdn.microsoft.com/en-us/library/aa364417.aspx) can monitor directory trees. Easysync client contains modified version of QFileSystemWatcher, called MFileSystemWatcher. All the related files are found in *qt* folder. The changes to QFileSystemWatcher are done not only to receive signals about changes in subfolders, but also to track changes of files inside the directory tree.
 
-In Linux Qt uses Inotify or Dnotify to watch directories. Inotify and Dnotify don’t support subfolder tracking nor is there a function similar to FindFirstChangeNotification in Linux. Easysync finds all subfolders of a given folder and adds watchers to these folders.
+In Linux Qt uses Inotify or Dnotify to watch directories. Inotify and Dnotify don't support subfolder tracking nor is there a function similar to FindFirstChangeNotification in Linux. Easysync finds all subfolders of a given folder and adds watchers to these folders.
 
 Installation
 ============
@@ -47,7 +47,7 @@ Known Issues
 
 Found a bug? [Report it!](https://github.com/fralik/Easysync/issues)
 
-Have a suggestion or critical comment? I would like to [hear](https://github.com/fralik/Easysync/issues) it!
+Have a suggestion or critical comment? Write me at fralik@gmail.com!
 
 Acknowledgement
 ===============
