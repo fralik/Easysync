@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/">
+   <file>images/application.svg</file>
+   <file>images/sync_16x16.png</file>
+   <file>images/disconnected_16x16.png</file>
+</qresource>
+</RCC>
