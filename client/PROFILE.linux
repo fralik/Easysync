@@ -1,8 +1,8 @@
 ﻿# Unison preferences
 fastcheck = true
-group = true
+group = false
 label = Your description goes here
-owner = true
+owner = false
 prefer = newer
 silent = true
 sshargs = -C
