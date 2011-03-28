@@ -54,7 +54,7 @@ Acknowledgement
 
 * I am using icons from [Tango](http://tango.freedesktop.org/Tango_Desktop_Project) collection. Some of them are slightly modified, but nevertheless based on Tango.
 
-* Thanks Gregory Konradt (g.konradt@gmail.com) for his support and help.
+* Thanks to Gregory Konradt (g.konradt@gmail.com) for his support and help.
 
 License
 =======
