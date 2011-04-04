@@ -11,7 +11,7 @@ class EasysyncServer : public QTcpServer
 {
     Q_OBJECT
 public:
-    explicit EasysyncServer(quint16 port, QObject* parent = 0);
+    explicit EasysyncServer(quint16 port, QObject* parent = 0, QString config_file = "");
     ~EasysyncServer();
 
     void pause();

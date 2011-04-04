@@ -57,6 +57,11 @@ install(){
 	sudo update-rc.d easysync-server defaults
 	echo "done"
 ########################
+    echo -n "   > prepare config file..."
+    mkdir /usr/local/share/easysync; chown root:root /usr/local/share/easysync; chmod 755 /usr/local/share/easysync/;
+    sudo cp config.ini.sample /usr/local/share/easysync/config.ini
+    echo "done"
+    ########################
 }
 
 uninstall(){
@@ -68,15 +73,14 @@ uninstall(){
 
 	echo -n " 	NOTICE: removing easysync-server files..."
 	rm -rf /etc/init.d/easysync-server
-	rm -rf /usr/bin/easysync-s*
+    rm -rf /usr/local/bin/easysync-s*
 	rm -rf /usr/local/share/easysync/
 	echo "done"
 }
 
 adduser(){
-	mkdir /usr/local/share/easysync; chown root:root /usr/local/share/easysync; chmod 755 /usr/local/share/easysync/;
 	echo "* Adding user ${username}"
-	su root -c "/usr/local/bin/easysync-server -e --adduser ${username} --quit"
+    su root -c "/usr/local/bin/easysync-server -e --adduser ${username} --quit --config /usr/local/share/config.ini"
 	echo "done"
 }
 ###############################################################################

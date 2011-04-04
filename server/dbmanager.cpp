@@ -10,12 +10,10 @@
 
 DbManager::DbManager()
 {
-    dbUser = "admin";
-    dbPasswd = "f[neyu"; // ahtung
+    dbUser = ""; /*!< Not used in SQLITE */
+    dbPasswd = ""; /*!< Not used in SQLITE */
     driver = "QSQLITE";
-    //dbName = QString(QDir::homePath() + QDir::separator() + ".easysync" + QDir::separator() + "easysync.sqlite");
-    // dirty hack:
-    dbName = "/usr/local/share/easysync/easysync.sqlite";
+    dbPath = "";
     host = "localhost";
     connectionName = "easysync-connection";
 }
@@ -25,15 +23,20 @@ DbManager::~DbManager()
     disconnect();
 }
 
+bool DbManager::isConnected()
+{
+    return db.isOpen();
+}
+
 bool DbManager::connect()
 {
     QSqlError err;
 
     db = QSqlDatabase::addDatabase(driver, connectionName);
-    db.setDatabaseName(dbName);
+    db.setDatabaseName(dbPath);
     db.setHostName(host);
     db.setPort(-1);
-    //qDebug() << "Trying to open DB" << dbName;
+    //qDebug() << "Trying to open DB" << dbPath;
     if (!db.open(dbUser, dbPasswd))
     {
         err = db.lastError();
@@ -45,6 +48,7 @@ bool DbManager::connect()
     }
     return true;
 }
+
 
 void DbManager::disconnect()
 {
@@ -256,4 +260,42 @@ bool DbManager::addHostname(const QString& username, const QString& hostname, in
     qDebug() << "Updated hostname" << hostname;
 
     return true;
+}
+
+
+void DbManager::initDbPath(QString config_file)
+{
+    QDir dir;
+    QString settings_dir = "";
+
+    QFileInfo config_info(config_file);
+
+    //qDebug() << "Got" << config_info.absoluteFilePath();
+
+    if (!config_file.isEmpty() && config_info.exists())
+    {
+        QSettings settings(config_info.absoluteFilePath(), QSettings::IniFormat);
+        dbPath = settings.value("dbPath").toString();
+        if (dbPath.isEmpty() || dbPath.isNull())
+        {
+            QtServiceBase::instance()->logMessage(QString("Failed to read dbPath from config file"));
+            settings_dir = QDir::homePath() + QDir::separator() + ".easysync";
+            dbPath = settings_dir + QDir::separator() + "easysync.sqlite";
+        }
+        else
+        {
+            settings_dir = QFileInfo(dbPath).absolutePath();
+        }
+
+        //qDebug() << "creating" << settings_dir;
+        dir.mkpath(settings_dir);
+    }
+    else
+    {
+        settings_dir = QDir::homePath() + QDir::separator() + ".easysync";
+        dir.mkpath(settings_dir);
+
+        dbPath = settings_dir + QDir::separator() + "easysync.sqlite";
+    }
+    qDebug() << "Set dbPath to" << dbPath;
 }

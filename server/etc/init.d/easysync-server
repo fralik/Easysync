@@ -36,7 +36,7 @@ set -e
 case "$1" in
   start)
 	echo -n "Starting $NAME daemon"
-	su $RUN_AS_USER -c "/usr/local/bin/easysync-server"
+    su $RUN_AS_USER -c "/usr/local/bin/easysync-server --config /usr/local/share/easysync/config.ini"
 	echo "."; echo "easysync-server started on `date`" >> $LOGFILE
 	
 	#echo `ps -fe | grep "/usr/bin/easysync-server" | grep -v grep | cut -d' ' -f7` > /var/run/$NAME.pid

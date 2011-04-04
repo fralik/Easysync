@@ -2,7 +2,7 @@
 #include "qt/qtservice.h"
 #include <iostream>
 
-EasysyncServer::EasysyncServer(quint16 port, QObject* parent)
+EasysyncServer::EasysyncServer(quint16 port, QObject* parent, QString config_file)
     : QTcpServer(parent), disabled(false)
 {
     qDebug() << "Starting Easysync Server on port" << QString("%1").arg(port);
@@ -11,11 +11,14 @@ EasysyncServer::EasysyncServer(quint16 port, QObject* parent)
 
     connect(this, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
     qDebug() << "Listening...";
-    dbManager.connect();
 
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(checkClientsConnection()));
-    timer->setInterval(5000);
+    dbManager.initDbPath(config_file);
+    if (dbManager.connect())
+    {
+        timer = new QTimer(this);
+        connect(timer, SIGNAL(timeout()), this, SLOT(checkClientsConnection()));
+        timer->setInterval(5000);
+    }
 }
 
 EasysyncServer::~EasysyncServer()
