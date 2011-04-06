@@ -48,8 +48,6 @@ bool DbManager::connect()
     }
     return true;
 }
-
-
 void DbManager::disconnect()
 {
     if (db.isOpen())

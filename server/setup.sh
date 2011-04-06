@@ -80,7 +80,7 @@ uninstall(){
 
 adduser(){
 	echo "* Adding user ${username}"
-    su root -c "/usr/local/bin/easysync-server -e --adduser ${username} --quit --config /usr/local/share/config.ini"
+    su root -c "/usr/local/bin/easysync-server -e --adduser ${username} --config /usr/local/share/config.ini"
 	echo "done"
 }
 ###############################################################################

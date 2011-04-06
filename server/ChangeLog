@@ -1,0 +1,9 @@
+Easysync-server
+===============
+
+Version 1.1.1
+--------------
+# Added support of the configuration file. User can provide path to the database 
+  or port number in the configuration file.
+# Added version information.
+# No SIGSEGV during setup.

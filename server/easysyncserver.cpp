@@ -1,16 +1,13 @@
 #include "easysyncserver.h"
 #include "qt/qtservice.h"
-#include <iostream>
 
 EasysyncServer::EasysyncServer(quint16 port, QObject* parent, QString config_file)
     : QTcpServer(parent), disabled(false)
 {
     qDebug() << "Starting Easysync Server on port" << QString("%1").arg(port);
     listen(QHostAddress::Any, port);
-    QtServiceBase::instance()->logMessage("Listening");
 
     connect(this, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
-    qDebug() << "Listening...";
 
     dbManager.initDbPath(config_file);
     if (dbManager.connect())
@@ -88,8 +85,8 @@ void EasysyncServer::clientDisconnected()
     qDebug() << "Client" << hostname << "disconnected";
     qDebug() << "There are" << clientConnections.length() << "connected clients";
 
-    QtServiceBase::instance()->logMessage(QString("Client %1 disconnected").arg(hostname));
-    QtServiceBase::instance()->logMessage(QString("There are %1 connected clients").arg(clientConnections.length()));
+    //QtServiceBase::instance()->logMessage(QString("Client %1 disconnected").arg(hostname));
+    //QtServiceBase::instance()->logMessage(QString("There are %1 connected clients").arg(clientConnections.length()));
 
     if (clientConnections.length() == 0)
         timer->stop();
@@ -240,7 +237,8 @@ void EasysyncServer::readClient()
                     return;
                 }
 
-                QtServiceBase::instance()->logMessage(QString("Client %1 is connected").arg(peerHostname));
+                //QtServiceBase::instance()->logMessage(QString("Client %1 is connected").arg(peerHostname));
+                qDebug() << QString("Client %1 is connected").arg(peerHostname);
 
                 if (dbManager.isSyncNeeded(peerHostname))
                 {

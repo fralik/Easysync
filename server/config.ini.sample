@@ -1,2 +1,4 @@
 dbPath=/usr/local/share/easysync/easysync.sqllite
+port=1984
+
 

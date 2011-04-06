@@ -10,6 +10,12 @@ INCLUDEPATH += ./qt
 
 TEMPLATE = app
 
+REVISION = $$system(git rev-parse --short HEAD)
+VERSION = 1.1.1
+VERSTR = '\\"$${VERSION}\\"'
+REVSTR = '\\"$${REVISION}\\"'
+DEFINES += VER=\"$${VERSTR}\" REV=\"$${REVSTR}\" 
+
 SOURCES += main.cpp \
     easysyncserver.cpp \
     easysyncservice.cpp \
