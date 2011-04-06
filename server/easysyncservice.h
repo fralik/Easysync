@@ -1,17 +1,12 @@
 #ifndef EASYSYNCSERVICE_H
 #define EASYSYNCSERVICE_H
 
-#include <QtCore/QCoreApplication>
-#include <QtNetwork/QTcpServer>
-#include <QtNetwork/QTcpSocket>
-#include <QtCore/QTextStream>
-#include <QtCore/QDateTime>
-#include <QtCore/QStringList>
-#include <QtCore/QDir>
-#include <QtCore/QSettings>
-
 #include "qt/qtservice.h"
 #include "easysyncserver.h"
+
+QT_BEGIN_NAMESPACE
+class QCoreApplication;
+QT_END_NAMESPACE
 
 class EasysyncService : public QtService<QCoreApplication>
 {
@@ -26,7 +21,7 @@ protected:
     void resume();
 
 private:
-    EasysyncServer *daemon;
+    EasysyncServer *server;
 };
 
 #endif // EASYSYNCSERVICE_H

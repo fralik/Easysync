@@ -1,7 +1,16 @@
 #include "easysyncserver.h"
 #include "qt/qtservice.h"
 
-EasysyncServer::EasysyncServer(quint16 port, QObject* parent, QString config_file)
+#include <QtCore/QCoreApplication>
+#include <QtNetwork/QTcpServer>
+#include <QtNetwork/QTcpSocket>
+#include <QtCore/QTextStream>
+#include <QtCore/QDateTime>
+#include <QtCore/QStringList>
+#include <QtCore/QDir>
+#include <QtCore/QSettings>
+
+EasysyncServer::EasysyncServer(quint16 port, QObject *parent, const QString configPath)
     : QTcpServer(parent), disabled(false)
 {
     qDebug() << "Starting Easysync Server on port" << QString("%1").arg(port);
@@ -9,12 +18,12 @@ EasysyncServer::EasysyncServer(quint16 port, QObject* parent, QString config_fil
 
     connect(this, SIGNAL(newConnection()), this, SLOT(handleNewConnection()));
 
-    dbManager.initDbPath(config_file);
+    dbManager.initDbPath(configPath);
     if (dbManager.connect())
     {
-        timer = new QTimer(this);
-        connect(timer, SIGNAL(timeout()), this, SLOT(checkClientsConnection()));
-        timer->setInterval(5000);
+        keepAliveTimer = new QTimer(this);
+        connect(keepAliveTimer, SIGNAL(timeout()), this, SLOT(checkClientsConnection()));
+        keepAliveTimer->setInterval(5000);
     }
 }
 
@@ -36,9 +45,7 @@ void EasysyncServer::checkClientsConnection()
         seconds = abs(currentTime.secsTo(lastSeen));
 
         if (seconds > 60)
-        {
             mustDisconnect.append(clientConnections.at(i));
-        }
     }
     for (int i = 0; i < mustDisconnect.length(); i++)
     {
@@ -65,16 +72,16 @@ void EasysyncServer::clientDisconnected()
 {
     QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
     QString hostname;
-    int socket_id;
+    int socketId;
 
     if (!client)
         return;
 
-    socket_id = clientConnections.indexOf(client);
-    if (socket_id != -1)
+    socketId = clientConnections.indexOf(client);
+    if (socketId != -1)
     {
-        hostname = peerNames.at(socket_id);
-        QTime lastSeen = clientLastSeen.at(socket_id);
+        hostname = peerNames.at(socketId);
+        QTime lastSeen = clientLastSeen.at(socketId);
 
         dbManager.voidConnection(hostname);
         clientConnections.removeAll(client);
@@ -89,7 +96,7 @@ void EasysyncServer::clientDisconnected()
     //QtServiceBase::instance()->logMessage(QString("There are %1 connected clients").arg(clientConnections.length()));
 
     if (clientConnections.length() == 0)
-        timer->stop();
+        keepAliveTimer->stop();
 
     client->deleteLater();
 }
@@ -141,7 +148,7 @@ void EasysyncServer::readClient()
     QRegExp searcher;
     QString username;
     QString peerHostname;
-    int socket_id = -1;
+    int socketId = -1;
 
     if (disabled)
         return;
@@ -155,9 +162,10 @@ void EasysyncServer::readClient()
 
         if (clientMessage.contains("pingpong", Qt::CaseInsensitive))
         {
-            socket_id = clientConnections.indexOf(socket);
-            if (socket_id != -1)
-                clientLastSeen.replace(socket_id, QTime::currentTime());
+            socketId = clientConnections.indexOf(socket);
+            if (socketId != -1)
+                clientLastSeen.replace(socketId, QTime::currentTime());
+
             return ;
         }
 
@@ -226,12 +234,12 @@ void EasysyncServer::readClient()
                 clientConnections.append(socket);
                 peerNames.append(peerHostname);
                 clientLastSeen.append(QTime::currentTime());
-                socket_id = clientConnections.indexOf(socket);
+                socketId = clientConnections.indexOf(socket);
 
                 if (clientConnections.length() == 1)
-                    timer->start();
+                    keepAliveTimer->start();
 
-                if (!dbManager.addHostname(username, peerHostname, socket_id))
+                if (!dbManager.addHostname(username, peerHostname, socketId))
                 {
                     socket->disconnectFromHost();
                     return;
@@ -248,8 +256,8 @@ void EasysyncServer::readClient()
                 break;
 
             case 2:
-                socket_id = clientConnections.indexOf(socket);
-                peerHostname = peerNames.at(socket_id);
+                socketId = clientConnections.indexOf(socket);
+                peerHostname = peerNames.at(socketId);
                 dbManager.syncIsDone(peerHostname);
                 break;
 
@@ -277,24 +285,24 @@ void EasysyncServer::readClient()
     }
 }
 
-void EasysyncServer::notifyClients(const QString& username)
+void EasysyncServer::notifyClients(const QString &username)
 {
     QList<int> sockets;
     dbManager.clientsToSync(username, sockets);
     qDebug() << "Will notify clients of user" << username;
 
-    foreach (int socket_id, sockets)
+    foreach (int socketId, sockets)
     {
-        if (socket_id == -1)
+        if (socketId == -1)
             continue;
-        QTcpSocket *client = clientConnections.at(socket_id);
-        QString peerHostname = peerNames.at(socket_id);
+        QTcpSocket *client = clientConnections.at(socketId);
+        QString peerHostname = peerNames.at(socketId);
         notifyClient(client, peerHostname);
     }
 }
 
 // incapsulate notification message
-void EasysyncServer::notifyClient(QTcpSocket *socket, const QString& hostname)
+void EasysyncServer::notifyClient(QTcpSocket *socket, const QString &hostname)
 {
     qDebug() << hostname << "must sync!";
     sendToClient(socket, QString("2. <%1>, sync is needed.\n").arg(hostname));

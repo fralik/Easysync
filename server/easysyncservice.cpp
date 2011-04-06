@@ -1,13 +1,9 @@
+#include "easysyncservice.h"
+#include "dbmanager.h"
+
 #include <QtSql>
 #include <QDebug>
 
-//#include <iostream>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <unistd.h>
-
-#include "easysyncservice.h"
-#include "dbmanager.h"
 EasysyncService::EasysyncService(int argc, char **argv)
     : QtService<QCoreApplication>(argc, argv, QString("Easysync-server daemon v%1").arg(VER))
 {
@@ -20,15 +16,15 @@ EasysyncService::EasysyncService(int argc, char **argv)
     setServiceDescription("Maintain client connections for easy synchronization");
     setServiceFlags(QtServiceBase::CanBeSuspended);
     setStartupType(QtServiceController::AutoStartup);
-    daemon = NULL;
+    server = NULL;
 }
 
 EasysyncService::~EasysyncService()
 {
-    if (daemon)
+    if (server)
     {
-        delete daemon;
-        daemon = NULL;
+        delete server;
+        server = NULL;
     }
 }
 
@@ -52,15 +48,12 @@ void EasysyncService::start()
 
     //! Optional path to the configuration file.
     /*!
-       It is usefull for systems where $HOME directory may be temporary (emdedded
-       devices). Using this parameter you are able to store config file on the
-       persistent storage.
+       Path to the configuration file is specified by '<daemon> --config <path>'.
+       Using non default path is usefull for systems where $HOME directory may 
+       be temporary (emdedded devices). Using this parameter it is possible to 
+       store config file on the persistent storage.
     */
-    QString config_file = "";
-
-    // Shows version information and quits. This is for future releases. Now it makes little sense
-    // because we can only view the version information if start daemon with -e argument.
-    //bool show_version = false;
+    QString configPath = "";
 
     // possible memory leak. In "A simple Service Controller" example this pointes is also not deleted.
     QCoreApplication *app = application();
@@ -70,40 +63,22 @@ void EasysyncService::start()
     {
         QString arg = app->argv()[i];
         qDebug() << "Got:" << arg;
-        if (arg.contains("adduser", Qt::CaseInsensitive))
+        if (arg == QLatin1String("--adduser"))
         {
             username = QString::fromLocal8Bit(app->argv()[i+1]);
             i++;
         }
-        else if (arg.contains("config", Qt::CaseInsensitive))
+        else if (arg == QLatin1String("--config"))
         {
-            config_file = QString::fromLocal8Bit(app->argv()[i+1]);
+            configPath = QString::fromLocal8Bit(app->argv()[i+1]);
             i++;
         }
-//        else if (arg.contains("version", Qt::CaseInsensitive) || arg.contains("-v", Qt::CaseInsensitive))
-//        {
-//            show_version = true;
-//            qDebug() << "must show version";
-//        }
     }
-
-//    if (show_version)
-//    {
-//        QTextStream cout(stdout);
-//        QString info = QString("Easysync Server, v%1, revision %2. Copyright (c) 2011 Vadim Frolov\n\n"
-//            "This program comes with ABSOLUTELY NO WARRANTY;\n"
-//            "This is free software, and you are welcome to redistribute it"
-//            "under certain conditions.\n").arg(VER).arg(REV);
-//        cout << info;
-//        stop();
-//        app->quit();
-//        return;
-//    }
 
     if (!username.isEmpty())
     {
         DbManager *dbManager = new DbManager();
-        dbManager->initDbPath(config_file);
+        dbManager->initDbPath(configPath);
         dbManager->connect();
         if (!dbManager->createTables())
         {
@@ -111,7 +86,7 @@ void EasysyncService::start()
             qDebug() << "Failed to create tables in the database";
 
         }
-        else if (!dbManager->addUser(username))
+        if (!dbManager->addUser(username))
         {
             logMessage("Failed to add user to the database");
             qDebug() << "Failed to add user to the database";
@@ -125,24 +100,24 @@ void EasysyncService::start()
         return;
     }
 
-    if (!config_file.isEmpty())
+    if (!configPath.isEmpty())
     {
-        QFileInfo config_info(config_file);
-        QSettings settings(config_info.absoluteFilePath(), QSettings::IniFormat);
+        QFileInfo configInfo(configPath);
+        QSettings settings(configInfo.absoluteFilePath(), QSettings::IniFormat);
         port = settings.value("port").toUInt();
     }
 
-    daemon = new EasysyncServer(port, app, config_file);
-    if (!daemon->isListening())
+    server = new EasysyncServer(port, app, configPath);
+    if (!server->isListening())
     {
-        logMessage(QString("Failed to bind to port %1").arg(daemon->serverPort()), QtServiceBase::Error);
-        qDebug() << QString("Failed to bind to port %1").arg(daemon->serverPort());
+        logMessage(QString("Failed to bind to port %1").arg(server->serverPort()), QtServiceBase::Error);
+        qDebug() << QString("Failed to bind to port %1").arg(server->serverPort());
 
         stop();
         app->quit();
         return;
     }
-    if (!daemon->dbManager.isConnected())
+    if (!server->dbManager.isConnected())
     {
         stop();
         app->quit();
@@ -155,21 +130,21 @@ void EasysyncService::start()
 
 void EasysyncService::stop()
 {
-    if (daemon)
+    if (server)
     {
-        daemon->dbManager.disconnect();
-        delete daemon;
-        daemon = NULL;
+        server->dbManager.disconnect();
+        delete server;
+        server = NULL;
     }
 }
 
 void EasysyncService::pause()
 {
-    daemon->pause();
+    server->pause();
 }
 
 void EasysyncService::resume()
 {
-    daemon->resume();
+    server->resume();
 }
 

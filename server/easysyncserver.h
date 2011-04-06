@@ -1,17 +1,17 @@
 #ifndef EASYSYNCSERVER_H
 #define EASYSYNCSERVER_H
 
-#include <QtCore>
-#include <QtNetwork>
-#include <QTime>
-
 #include "dbmanager.h"
+
+#include <QtNetwork/QTcpServer>
+#include <QtCore/QList>
+#include <QTimer>
 
 class EasysyncServer : public QTcpServer
 {
     Q_OBJECT
 public:
-    explicit EasysyncServer(quint16 port, QObject* parent = 0, QString config_file = "");
+    explicit EasysyncServer(quint16 port, QObject *parent = 0, const QString configPath = "");
     ~EasysyncServer();
 
     void pause();
@@ -20,23 +20,23 @@ public:
 
     DbManager dbManager;
 
-protected slots:
+protected Q_SLOTS:
     void handleNewConnection();
     void clientDisconnected();
     void readClient();
     void checkClientsConnection();
 
 private:
-    void sendToClient(QTcpSocket *socket, const QString& message);
-    bool getUserInfo(const QString& message, QString *username, QString *hostname);
-    void notifyClients(const QString& username);
-    void notifyClient(QTcpSocket *socket, const QString& hostname);
+    void sendToClient(QTcpSocket *socket, const QString &message);
+    bool getUserInfo(const QString &message, QString *username, QString *hostname);
+    void notifyClients(const QString &username);
+    void notifyClient(QTcpSocket *socket, const QString &hostname);
 
     bool disabled;
     QList<QTcpSocket *> clientConnections;
     QList<QString > peerNames;
     QList<QTime > clientLastSeen;
-    QTimer *timer;
+    QTimer *keepAliveTimer;
 
 };
 #endif // EASYSYNCSERVER_H

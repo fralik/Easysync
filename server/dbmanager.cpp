@@ -10,12 +10,10 @@
 
 DbManager::DbManager()
 {
-    dbUser = ""; /*!< Not used in SQLITE */
-    dbPasswd = ""; /*!< Not used in SQLITE */
-    driver = "QSQLITE";
-    dbPath = "";
-    host = "localhost";
-    connectionName = "easysync-connection";
+    driver = QLatin1String("QSQLITE");
+    dbPath = QLatin1String("");
+    host = QLatin1String("localhost");
+    connectionName = QLatin1String("easysync-connection");
 }
 
 DbManager::~DbManager()
@@ -23,7 +21,7 @@ DbManager::~DbManager()
     disconnect();
 }
 
-bool DbManager::isConnected()
+bool DbManager::isConnected() const
 {
     return db.isOpen();
 }
@@ -37,7 +35,7 @@ bool DbManager::connect()
     db.setHostName(host);
     db.setPort(-1);
     //qDebug() << "Trying to open DB" << dbPath;
-    if (!db.open(dbUser, dbPasswd))
+    if (!db.open(QLatin1String(""), QLatin1String(""))) /*!< Username and password are not used in SQLITE */
     {
         err = db.lastError();
         disconnect();
@@ -48,6 +46,7 @@ bool DbManager::connect()
     }
     return true;
 }
+
 void DbManager::disconnect()
 {
     if (db.isOpen())
@@ -113,7 +112,7 @@ void DbManager::voidConnection(const QString &hostname)
 /*
     sets 'must_sync' to 1 for all hostnames, except given hostname
 */
-void DbManager::setNotifyAllExcept(const QString& username, const QString& hostname)
+void DbManager::setNotifyAllExcept(const QString &username, const QString &hostname)
 {
     if (!db.isOpen())
         return;
@@ -130,7 +129,7 @@ void DbManager::setNotifyAllExcept(const QString& username, const QString& hostn
     query.exec();
 }
 
-bool DbManager::addUser(const QString& username)
+bool DbManager::addUser(const QString &username)
 {
     if (!db.isOpen())
         return false;
@@ -146,7 +145,7 @@ bool DbManager::addUser(const QString& username)
     return true;
 }
 
-bool DbManager::isUserValid(const QString& username)
+bool DbManager::isUserValid(const QString &username)
 {
     if (!db.isOpen())
         return false;
@@ -187,8 +186,8 @@ void DbManager::clientsToSync(const QString &username, QList<int> &sockets)
     sockets.clear();
     while (query.next())
     {
-        int socket_id = query.value(0).toInt();
-        sockets.append(socket_id);
+        int socketId = query.value(0).toInt();
+        sockets.append(socketId);
     }
 }
 
@@ -205,7 +204,7 @@ void DbManager::syncIsDone(const QString &hostname)
     qDebug() << "Set must_sync = 0 for hostname" << hostname;
 }
 
-bool DbManager::isSyncNeeded(const QString& hostname)
+bool DbManager::isSyncNeeded(const QString &hostname)
 {
     if (!db.isOpen())
         return false;
@@ -220,7 +219,7 @@ bool DbManager::isSyncNeeded(const QString& hostname)
     return false;
 }
 
-bool DbManager::addHostname(const QString& username, const QString& hostname, int socket_id)
+bool DbManager::addHostname(const QString &username, const QString &hostname, const int socketId)
 {
     if (!db.isOpen())
         return false;
@@ -252,7 +251,7 @@ bool DbManager::addHostname(const QString& username, const QString& hostname, in
     }
 
     query.prepare("UPDATE hosts SET socket_id = :socket_id WHERE hostname = :hostname;");
-    query.bindValue(":socket_id", socket_id);
+    query.bindValue(":socket_id", socketId);
     query.bindValue(":hostname", hostname);
     query.exec();
     qDebug() << "Updated hostname" << hostname;
@@ -261,39 +260,39 @@ bool DbManager::addHostname(const QString& username, const QString& hostname, in
 }
 
 
-void DbManager::initDbPath(QString config_file)
+void DbManager::initDbPath(const QString configPath)
 {
     QDir dir;
-    QString settings_dir = "";
+    QString settingsDir = "";
 
-    QFileInfo config_info(config_file);
+    QFileInfo configInfo(configPath);
 
-    //qDebug() << "Got" << config_info.absoluteFilePath();
+    //qDebug() << "Got" << configInfo.absoluteFilePath();
 
-    if (!config_file.isEmpty() && config_info.exists())
+    if (!configPath.isEmpty() && configInfo.exists())
     {
-        QSettings settings(config_info.absoluteFilePath(), QSettings::IniFormat);
+        QSettings settings(configInfo.absoluteFilePath(), QSettings::IniFormat);
         dbPath = settings.value("dbPath").toString();
         if (dbPath.isEmpty() || dbPath.isNull())
         {
             QtServiceBase::instance()->logMessage(QString("Failed to read dbPath from config file"));
-            settings_dir = QDir::homePath() + QDir::separator() + ".easysync";
-            dbPath = settings_dir + QDir::separator() + "easysync.sqlite";
+            settingsDir = QDir::homePath() + QDir::separator() + QLatin1String(".easysync");
+            dbPath = settingsDir + QDir::separator() + QLatin1String("easysync.sqlite");
         }
         else
         {
-            settings_dir = QFileInfo(dbPath).absolutePath();
+            settingsDir = QFileInfo(dbPath).absolutePath();
         }
 
-        //qDebug() << "creating" << settings_dir;
-        dir.mkpath(settings_dir);
+        //qDebug() << "creating" << settingsDir;
+        dir.mkpath(settingsDir);
     }
     else
     {
-        settings_dir = QDir::homePath() + QDir::separator() + ".easysync";
-        dir.mkpath(settings_dir);
+        settingsDir = QDir::homePath() + QDir::separator() + QLatin1String(".easysync");
+        dir.mkpath(settingsDir);
 
-        dbPath = settings_dir + QDir::separator() + "easysync.sqlite";
+        dbPath = settingsDir + QDir::separator() + QLatin1String("easysync.sqlite");
     }
     qDebug() << "Set dbPath to" << dbPath;
 }
