@@ -114,7 +114,8 @@ private:
     bool notifyAllAfterSync;
     QProcess *unisonProcess;
 
-    QMutex mutex;
+    bool syncInProgress;
+    bool needToSync;
 
     QNetworkConfigurationManager *networkManager;
     QTcpSocket *server;

@@ -13,8 +13,10 @@
 #include "ui_client.h"
 
 Client::Client(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::Client)
+    QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint),
+    ui(new Ui::Client),
+    syncInProgress(false),
+    needToSync(false)
 {
     socketReady = false;
     keepAliveInterval = 60000; // 60 seconds
@@ -68,8 +70,6 @@ Client::~Client()
 {
     server->disconnectFromHost();
     
-    mutex.unlock(); // just in case there was an error in unisonProcess
-
     delete ui;
 }
 
@@ -212,7 +212,13 @@ void Client::handleSyncIsFinished(int exitCode, QProcess::ExitStatus exitStatus)
             server->write(QString("2. Roger\n").toUtf8());
         server->flush();
     }
-    mutex.unlock();
+
+    syncInProgress = false;
+    if (needToSync)
+    {
+        needToSync = false;
+        startSynchronisation(Easysync::NotifyAll);
+    }
 }
 
 void Client::sendGreetings()
@@ -270,7 +276,12 @@ void Client::handleSyncTimer()
 */
 void Client::startSynchronisation(bool notifyAll)
 {
-    mutex.lock();
+    if (syncInProgress)
+    {
+        needToSync = true; // mark the need of synchronisation and return
+        return;
+    }
+    syncInProgress = true;
     
     notifyAllAfterSync = notifyAll;
     setIcon(Easysync::SyncInProgressIcon);
@@ -369,12 +380,12 @@ void Client::selectDirectory()
 void Client::showAbout()
 {
     QMessageBox msgBox;
-    QString msg(tr("Easysync Clinet Copyright (c) 2011 Vadim Frolov\n\n"));
-    msg.append(tr("This program comes with ABSOLUTELY NO WARRANTY;\n"
-               "This is free software, and you are welcome to redistribute it"
-               "under certain conditions."));
+    QString msg = tr("Easysync-client, v%1, revision %2. Copyright (c) 2011 Vadim Frolov\n\n"
+        "This program comes with ABSOLUTELY NO WARRANTY;\n"
+        "This is free software, and you are welcome to redistribute it "
+        "under certain conditions.").arg(VER).arg(REV);
 
-    msgBox.about(this, tr("About Easysync Client"), msg);
+    msgBox.about(this, tr("About Easysync-client"), msg);
 }
 
 // actions for the tray menu

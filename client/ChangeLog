@@ -1,0 +1,9 @@
+Easysync-client
+===============
+
+Version 1.1.1
+--------------
+# Synchronisation process is now non-blocking. This allows user to quit the 
+  application if synchronisation needs input from the user.
+# Added version information.
+# Removed help button in the settings dialog.
