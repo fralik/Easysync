@@ -3,10 +3,7 @@
 
 #include <QSystemTrayIcon>
 #include <QDialog>
-#include <QTcpSocket>
-#include <QTimer>
 #include <QProcess>
-#include <QMutex>
 
 #if defined(Q_OS_WIN)
     #include "qt/mfilesystemwatcher.h"
@@ -28,8 +25,6 @@ class QTextEdit;
 class QTcpSocket;
 class QTimer;
 class QNetworkConfigurationManager;
-class QProcess;
-class QMutex;
 QT_END_NAMESPACE
 
 namespace Easysync
@@ -51,40 +46,44 @@ public:
     explicit Client(QWidget *parent = 0);
     ~Client();
 
-private slots:
+private Q_SLOTS:
     void connectToServer();
     void checkServerConnection();
     void handleSocketConnected();
     void handleSocketDisconnected();
     void readFromServer();
-    void handleSyncTimer();
-    /* sends "pingpong" message to the server */
+    /*! Sends "pingpong" message to the server. */
     void sendKeepAlive();
+    void onlineStateChanged(bool isOnline);
+
+    void handleDirectoryChanged(const QString &path);
+    //! Synchronisation is started after a short period of time after change event has occured.
+    void handleSyncTimer();
     void handleSyncIsFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
     void handleSaveButton();
     void selectDirectory();
-    void handleDirectoryChanged(const QString &path);
-    void onlineStateChanged(bool isOnline);
     void showAbout();
+
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void setIcon(Easysync::AvailableIcons icon);
 
 private:
+    //! Checks settings presence in the configuration file. */
     void checkSettings();
-    /* creates action for the systray menu */
+    /*! Creates action for the systray menu. */
     void createActions();
     void createTrayIcon();
     void writeSettings();
 
-    /* sends initial message to the server */
+    /*! Sends initial message to the server. */
     void sendGreetings();
     void startSynchronisation(bool notifyAll = Easysync::NotifyAll);
 
     void installWatcher();
     void stopWatcher();
 
-    /* returns list of all subfolders of a given folder */
+    /*! Returns list of all subfolders of a given folder. */
     QStringList subFolders(const QString &folder);
 
     Ui::Client *ui;

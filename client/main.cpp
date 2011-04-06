@@ -1,7 +1,6 @@
-#include <QtGui>
-
 #include "client.h"
-#include <QDebug>
+
+#include <QtGui>
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +18,5 @@ int main(int argc, char *argv[])
 
 
     Client window;
-    //window.show();
     return app.exec();
 }

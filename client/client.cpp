@@ -1,3 +1,6 @@
+#include "client.h"
+#include "ui_client.h"
+
 #include <QtGui>
 #include <QSettings>
 #include <QMessageBox>
@@ -8,9 +11,6 @@
 #include <QProcess>
 #include <QtNetwork>
 #include <QtNetwork/QNetworkConfigurationManager>
-
-#include "client.h"
-#include "ui_client.h"
 
 Client::Client(QWidget *parent) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint),
