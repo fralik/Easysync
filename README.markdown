@@ -37,8 +37,6 @@ Precompiled executable is available for Windows users. Please, refer to *client/
 Known Issues
 ============
 
-* There is a SIGSEGV report related to Easysync in syslog. However, I can not see how it affects the application. Need to find the cause of the problem.
- 
 * Client does not *remember* that it should perform synchronisation. So if you modify something in the watched directory while there is no connection to the server and quit the application afterwards, the client will not perform the synchronization on the next successful connection to the server.
 
 * Mac OS X support. It is possible to build the client in OS X, however I had no luck to install command line Unison 2.40.61. Synchronisation using GUI failed for some reason. Probably becuase of the file permissions.
