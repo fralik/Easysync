@@ -28,7 +28,7 @@ Installation
 
 General instructions:
 * Get the source code
-    git clone git@github.com/fralik/Easysync.git
+    git clone git://github.com/fralik/Easysync.git
 * Navigate to the desired directory (server or client).
 * Read installation instruction in appropriate INSTALL file.
 
