@@ -9,6 +9,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QDir>
 #include <QtCore/QSettings>
+#include <QDebug>
 
 EasysyncServer::EasysyncServer(quint16 port, QObject *parent, const QString configPath)
     : QTcpServer(parent), disabled(false)

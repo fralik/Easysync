@@ -6,6 +6,7 @@
 #include <QtNetwork/QTcpServer>
 #include <QtCore/QList>
 #include <QTimer>
+#include <QTime>
 
 class EasysyncServer : public QTcpServer
 {
