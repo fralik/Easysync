@@ -6,3 +6,5 @@ Server is installed in */usr/local/bin*, database can be found in */usr/local/sh
 
 To uninstall Easysync-server run
     sudo ./setup.sh uninstall
+
+You can install Easysync-server on your router. For an example, refer to [Wiki page](https://github.com/fralik/Easysync/wiki/Installation-on-Asus-RT-N16)
