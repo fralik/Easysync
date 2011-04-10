@@ -1,6 +1,10 @@
 Easysync-server
 ===============
 
+Version 1.1.2
+-------------
+# It is now possible to install Easysync-server in DD-WRT (tested on Asus RT-N16).
+
 Version 1.1.1
 --------------
 # Added support of the configuration file. User can provide path to the database 

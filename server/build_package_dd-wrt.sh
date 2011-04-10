@@ -11,9 +11,9 @@ else
 fi
 
 cp ./build/easysync-server ./easysync-server
-tar -czf dd-wrt_bundle.tar.gz easysync-server config.ini.sample etc/init.d/easysync-server-mips setup_dd-wrt.sh
+tar -czf easysync-server_mipsel.tar.gz easysync-server config.ini.sample etc/init.d/easysync-server-mips setup_dd-wrt.sh
 rm -f ./easysync-server
 
 echo "* Done!"
-echo "Copy dd-wrt_bundle.tar.gz to your device, unpack, edit config.ini.sample, run setup_dd-wrt.sh, enjoy!"
+echo "* Copy easysync-server_mipsel.tar.gz to your device, unpack, edit config.ini.sample, run setup_dd-wrt.sh, enjoy!"
 exit 0;
