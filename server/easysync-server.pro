@@ -11,7 +11,7 @@ INCLUDEPATH += ./qt
 TEMPLATE = app
 
 REVISION = $$system(git rev-parse --short HEAD)
-VERSION = 1.1.1
+VERSION = 1.1.2
 VERSTR = '\\"$${VERSION}\\"'
 REVSTR = '\\"$${REVISION}\\"'
 DEFINES += VER=\"$${VERSTR}\" REV=\"$${REVSTR}\" NEED_PRINTF=1
