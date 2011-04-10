@@ -148,62 +148,98 @@ QString QtServiceBasePrivate::filePath() const
 
 QString QtServiceController::serviceDescription() const
 {
-    QSettings settings(QSettings::SystemScope, "QtSoftware");
-    settings.beginGroup("services");
-    settings.beginGroup(serviceName());
+    //QSettings settings(QSettings::SystemScope, "QtSoftware");
+    
+    QSettings *settings = new QSettings(QSettings::SystemScope, "QtSoftware");
+    if (!settings->isWritable()) //! on emdedded Linux devices /etc can be read-only
+    {
+        delete settings;
+        settings = new QSettings(QSettings::UserScope, "QtSoftware");
+    }
+    settings->beginGroup("services");
+    settings->beginGroup(serviceName());
 
-    QString desc = settings.value("description").toString();
+    QString desc = settings->value("description").toString();
 
-    settings.endGroup();
-    settings.endGroup();
+    settings->endGroup();
+    settings->endGroup();
+    
+    delete settings;
 
     return desc;
 }
 
 QtServiceController::StartupType QtServiceController::startupType() const
 {
-    QSettings settings(QSettings::SystemScope, "QtSoftware");
-    settings.beginGroup("services");
-    settings.beginGroup(serviceName());
+    //QSettings settings(QSettings::SystemScope, "QtSoftware");
+    
+    QSettings *settings = new QSettings(QSettings::SystemScope, "QtSoftware");
+    if (!settings->isWritable()) //! on emdedded Linux devices /etc can be read-only
+    {
+        delete settings;
+        settings = new QSettings(QSettings::UserScope, "QtSoftware");
+    }
+    settings->beginGroup("services");
+    settings->beginGroup(serviceName());
 
-    StartupType startupType = (StartupType)settings.value("startupType").toInt();
+    StartupType startupType = (StartupType)settings->value("startupType").toInt();
 
-    settings.endGroup();
-    settings.endGroup();
+    settings->endGroup();
+    settings->endGroup();
+    
+    delete settings;
 
     return startupType;
 }
 
 QString QtServiceController::serviceFilePath() const
 {
-    QSettings settings(QSettings::SystemScope, "QtSoftware");
-    settings.beginGroup("services");
-    settings.beginGroup(serviceName());
+    //QSettings settings(QSettings::SystemScope, "QtSoftware");
+    
+    QSettings *settings = new QSettings(QSettings::SystemScope, "QtSoftware");
+    if (!settings->isWritable()) //! on emdedded Linux devices /etc can be read-only
+    {
+        delete settings;
+        settings = new QSettings(QSettings::UserScope, "QtSoftware");
+    }
+    settings->beginGroup("services");
+    settings->beginGroup(serviceName());
 
-    QString path = settings.value("path").toString();
+    QString path = settings->value("path").toString();
 
-    settings.endGroup();
-    settings.endGroup();
+    settings->endGroup();
+    settings->endGroup();
+    
+    delete settings;
 
     return path;
 }
 
 bool QtServiceController::uninstall()
 {
-    QSettings settings(QSettings::SystemScope, "QtSoftware");
-    settings.beginGroup("services");
+    //QSettings settings(QSettings::SystemScope, "QtSoftware");
+    QSettings *settings = new QSettings(QSettings::SystemScope, "QtSoftware");
+    if (!settings->isWritable()) //! on emdedded Linux devices /etc can be read-only
+    {
+        delete settings;
+        settings = new QSettings(QSettings::UserScope, "QtSoftware");
+    }
+    settings->beginGroup("services");
 
-    settings.remove(serviceName());
+    settings->remove(serviceName());
 
-    settings.endGroup();
-    settings.sync();
+    settings->endGroup();
+    settings->sync();
 
-    QSettings::Status ret = settings.status();
+    QSettings::Status ret = settings->status();
     if (ret == QSettings::AccessError) {
         fprintf(stderr, "Cannot uninstall \"%s\". Cannot write to: %s. Check permissions.\n",
                 serviceName().toLatin1().constData(),
-                settings.fileName().toLatin1().constData());
+                settings->fileName().toLatin1().constData());
     }
+    
+    delete settings;
+    
     return (ret == QSettings::NoError);
 }
 
@@ -239,19 +275,30 @@ bool QtServiceController::sendCommand(int code)
 
 bool QtServiceController::isInstalled() const
 {
-    QSettings settings(QSettings::SystemScope, "QtSoftware");
-    settings.beginGroup("services");
+    //QSettings settings(QSettings::SystemScope, "QtSoftware");
+    QSettings *settings = new QSettings(QSettings::SystemScope, "QtSoftware");
+    if (!settings->isWritable()) //! on emdedded Linux devices /etc can be read-only
+    {
+        delete settings;
+        settings = new QSettings(QSettings::UserScope, "QtSoftware");
+    }
+    settings->beginGroup("services");
 
-    QStringList list = settings.childGroups();
+    QStringList list = settings->childGroups();
 
-    settings.endGroup();
+    settings->endGroup();
 
     QStringListIterator it(list);
     while (it.hasNext()) {
         if (it.next() == serviceName())
+        {
+            delete settings;
             return true;
+        }
     }
 
+    delete settings;
+    
     return false;
 }
 
@@ -411,25 +458,34 @@ bool QtServiceBasePrivate::install(const QString &account, const QString &passwo
 {
     Q_UNUSED(account)
     Q_UNUSED(password)
-    QSettings settings(QSettings::SystemScope, "QtSoftware");
+    //QSettings settings(QSettings::SystemScope, "QtSoftware");
+    QSettings *settings = new QSettings(QSettings::SystemScope, "QtSoftware");
+    if (!settings->isWritable()) //! on emdedded Linux devices /etc can be read-only
+    {
+        delete settings;
+        settings = new QSettings(QSettings::UserScope, "QtSoftware");
+    }
 
-    settings.beginGroup("services");
-    settings.beginGroup(controller.serviceName());
+    settings->beginGroup("services");
+    settings->beginGroup(controller.serviceName());
 
-    settings.setValue("path", filePath());
-    settings.setValue("description", serviceDescription);
-    settings.setValue("automaticStartup", startupType);
+    settings->setValue("path", filePath());
+    settings->setValue("description", serviceDescription);
+    settings->setValue("automaticStartup", startupType);
 
-    settings.endGroup();
-    settings.endGroup();
-    settings.sync();
+    settings->endGroup();
+    settings->endGroup();
+    settings->sync();
 
-    QSettings::Status ret = settings.status();
+    QSettings::Status ret = settings->status();
     if (ret == QSettings::AccessError) {
         fprintf(stderr, "Cannot install \"%s\". Cannot write to: %s. Check permissions.\n",
                 controller.serviceName().toLatin1().constData(),
-                settings.fileName().toLatin1().constData());
+                settings->fileName().toLatin1().constData());
     }
+    
+    delete settings;
+    
     return (ret == QSettings::NoError);
 }
 

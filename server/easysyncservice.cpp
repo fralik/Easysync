@@ -110,8 +110,8 @@ void EasysyncService::start()
     server = new EasysyncServer(port, app, configPath);
     if (!server->isListening())
     {
-        logMessage(QString("Failed to bind to port %1").arg(server->serverPort()), QtServiceBase::Error);
-        qDebug() << QString("Failed to bind to port %1").arg(server->serverPort());
+        logMessage(QString("Failed to bind to port %1").arg(port), QtServiceBase::Error);
+        qDebug() << QString("Failed to bind to port %1").arg(port);
 
         stop();
         app->quit();

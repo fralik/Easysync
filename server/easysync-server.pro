@@ -14,7 +14,7 @@ REVISION = $$system(git rev-parse --short HEAD)
 VERSION = 1.1.1
 VERSTR = '\\"$${VERSION}\\"'
 REVSTR = '\\"$${REVISION}\\"'
-DEFINES += VER=\"$${VERSTR}\" REV=\"$${REVSTR}\" 
+DEFINES += VER=\"$${VERSTR}\" REV=\"$${REVSTR}\" NEED_PRINTF=1
 
 SOURCES += main.cpp \
     easysyncserver.cpp \
@@ -34,4 +34,5 @@ CONFIG(release, release|debug) {
     DEFINES += QT_NO_DEBUG_OUTPUT
 } else {
     DEFINES -= QT_NO_DEBUG_OUTPUT
+    DEFINES += QTSERVICE_DEBUG=1
 }

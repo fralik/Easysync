@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/opt/bin/bash
 # Name : setup.sh
 # Author : Vadim Frolov <fralik@gmail.com>
 # Site : 
@@ -20,18 +20,16 @@ else
 fi
 ###############################################################################
 
-
 ###############################################################################
-# Checking if this system is either Debian or Ubuntu
+# Check if unison is installed
 ###############################################################################
-echo -n "* Checking if the installer supports this system..."
-if [ `cat /etc/issue.net | cut -d' ' -f1` == "Debian" ] || [ `cat /etc/issue.net | cut -d' ' -f1` == "Ubuntu" ];then
-	echo "ok"
+echo -n "* Checking that unison is installed..."
+if [ ! -f /opt/bin/unison ]; then 
+	echo; echo "	ERROR: Unison is not installed. Install Unison in /opt/bin/" ; exit 1;
 else
-	echo; echo "	ERROR: this installer currently does not support your system,"
-	echo       "	but you can try, it could work (tm) - let us know if it does"
+	echo "ok"
 fi
-###############################################################################
+
 
 ###############################################################################
 # Define functions
@@ -39,52 +37,48 @@ fi
 questions(){
 	echo -n "	- username (will be able to use easysync): "
     	read username
-	#echo -n "	- path to install Easysync-server[/usr/local/bin/]: "
-	#read service_path
-	#echo -n "	- path where to copy config file[/usr/local/share/easysync]: "
-	#echo service_config_path
 }
 
 install(){
 ########################
 	echo "* Installing easysync server..."
-	echo "	> installing /usr/local/bin/easysync-server..."
-	cp build/easysync-server /usr/local/bin/; chown root:root /usr/local/bin/easysync-server; chmod 755 /usr/local/bin/easysync-server
-	/usr/local/bin/easysync-server -i
+	echo "	> installing /opt/bin/easysync-server..."
+	cp easysync-server /opt/bin/; chown root:root /opt/bin/easysync-server; chmod 755 /opt/bin/easysync-server
+	/opt/bin/easysync-server -i
 	echo "	done"
 ########################
-	echo -n "	> installing /etc/init.d/easysync-server..."
-	cp etc/init.d/easysync-server /etc/init.d/easysync-server; chown root:root /etc/init.d/easysync-server; chmod 755 /etc/init.d/easysync-server
+	echo -n "	> installing /opt/etc/init.d/easysync-server..."
+	cp etc/init.d/easysync-server-mips /opt/etc/init.d/easysync-server; chown root:root /opt/etc/init.d/easysync-server; chmod 755 /opt/etc/init.d/easysync-server
 	echo "done"
 ########################
-	echo -n "	> setting easysync to run during the system startup..."
-	sudo update-rc.d easysync-server defaults
+	#echo -n "	> setting easysync to run during the system startup..."
+	#sudo update-rc.d easysync-server defaults
+	#echo "done"
+########################
+	echo -n "   > prepare config file..."
+	mkdir /opt/etc/easysync-server; chown root:root /opt/etc/easysync-server; chmod 755 /opt/etc/easysync-server;
+	sudo cp config.ini.sample /opt/etc/easysync-server/config.ini
 	echo "done"
 ########################
-    echo -n "   > prepare config file..."
-    mkdir /usr/local/share/easysync; chown root:root /usr/local/share/easysync; chmod 755 /usr/local/share/easysync/;
-    sudo cp config.ini.sample /usr/local/share/easysync/config.ini
-    echo "done"
-    ########################
 }
 
 uninstall(){
 	#echo -n "	NOTICE: stopping easysync-server service..."
-	su root -c "/etc/init.d/easysync-server stop >> /dev/null"
-	su root -c "/usr/local/bin/easysync-server -u"
-	sudo update-rc.d -f easysync-server remove
+	su root -c "/opt/etc/init.d/easysync-server stop >> /dev/null"
+	su root -c "/opt/bin/easysync-server -u"
+	#sudo update-rc.d -f easysync-server remove
 	echo "done"
 
 	echo -n " 	NOTICE: removing easysync-server files..."
-	rm -rf /etc/init.d/easysync-server
-    rm -rf /usr/local/bin/easysync-s*
-	rm -rf /usr/local/share/easysync/
+	rm -rf /opt/etc/init.d/easysync-server
+	rm -rf /opt/bin/easysync-s*
+	rm -rf /opt/etc/easysync-server/
 	echo "done"
 }
 
 adduser(){
 	echo "* Adding user ${username}"
-    su root -c "/usr/local/bin/easysync-server -e --adduser ${username} --config /usr/local/share/config.ini"
+	su root -c "/opt/bin/easysync-server -e --adduser ${username} --config /opt/etc/easysync-server/config.ini"
 	echo "done"
 }
 ###############################################################################
@@ -109,13 +103,13 @@ fi
 # Startup easysync-server and exit
 ###############################################################################
 echo "easysync-server setup complete, staring easysync-server..."
-su root -c "/etc/init.d/easysync-server start"
-if [ -f /var/run/easysync-server.pid ]; then
-	echo "	NOTICE: easysync-server is running as pid `cat /var/run/easysync-server.pid`"
-	echo "	Check /var/log/syslog for details"
+su root -c "/opt/etc/init.d/easysync-server start"
+if [ -f /tmp/var/run/easysync-server.pid ]; then
+	echo "	NOTICE: easysync-server is running as pid `cat /tmp/var/run/easysync-server.pid`"
+	echo "	Check /tmp/var/log/messages for details"
 else
 	echo "	NOTICE: easysync-server failed to start..."
-	echo "	Check /var/log/syslog for details"
+	echo "	Check /tmp/var/log/messages for details"
 fi
 ###############################################################################
 

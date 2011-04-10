@@ -269,12 +269,13 @@ void DbManager::initDbPath(const QString configPath)
 
     //qDebug() << "Got" << configInfo.absoluteFilePath();
 
-    if (!configPath.isEmpty() && configInfo.exists())
+    if (!configPath.isEmpty()/* && configInfo.exists()*/)
     {
         QSettings settings(configInfo.absoluteFilePath(), QSettings::IniFormat);
         dbPath = settings.value("dbPath").toString();
         if (dbPath.isEmpty() || dbPath.isNull())
         {
+            //qDebug() << "no dbPath";
             QtServiceBase::instance()->logMessage(QString("Failed to read dbPath from config file"));
             settingsDir = QDir::homePath() + QDir::separator() + QLatin1String(".easysync");
             dbPath = settingsDir + QDir::separator() + QLatin1String("easysync.sqlite");
