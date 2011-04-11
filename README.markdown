@@ -59,3 +59,7 @@ License
 Easysync is licensed under GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this software.
 
 Copyright (c) 2011 Vadim Frolov
+
+Информация на русском
+===================
+* [Использование сервера на домашнем рутере с установленной прошивкой DD-WRT](http://habrahabr.ru/blogs/programming/117194/)
