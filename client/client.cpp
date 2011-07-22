@@ -75,15 +75,9 @@ Client::~Client()
 
 void Client::connectToServer()
 {
-    if (socketReady)
-    {
-        server->abort();
-        server->disconnectFromHost();
-        server->deleteLater();
-    }
-
     qDebug() << "Trying to connect to the server";
-    server->abort();
+    
+    server->abort(); // abort current connection if any, even if there is data in buffers
     server->connectToHost(ui->serverAddressEdit->text(), ui->portEdit->text().toInt());
 
     QTimer::singleShot(2000, this, SLOT(checkServerConnection()));
