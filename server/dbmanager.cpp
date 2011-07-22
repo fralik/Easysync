@@ -30,6 +30,14 @@ bool DbManager::connect()
 {
     QSqlError err;
 
+    if (dbPath.isEmpty())
+    {
+        QString errMsg("DbManager failed to open the database: path to the database is not set.");
+        qDebug() << errMsg;
+        QtServiceBase::instance()->logMessage(errMsg);
+        return false;
+    }
+
     db = QSqlDatabase::addDatabase(driver, connectionName);
     db.setDatabaseName(dbPath);
     db.setHostName(host);
@@ -98,6 +106,11 @@ bool DbManager::createTables()
     return true;
 }
 
+/*
+    This function removes the reference to the socket used by a 
+    client-server connection after client has disconnected or
+    connection had been lost.
+*/
 void DbManager::voidConnection(const QString &hostname)
 {
     if (!db.isOpen())
@@ -153,6 +166,7 @@ bool DbManager::isUserValid(const QString &username)
     QString safeUsername = sqlQuote(username);
     QSqlQuery query(db);
     QString sQuery(QString("SELECT username FROM users WHERE username='%1';").arg(safeUsername));
+    qDebug() << "Function isUserValid, query string:" << sQuery;
     if (!query.exec(sQuery))
     {
         qDebug() << "failed to perfrom query isUserValid";
@@ -265,11 +279,20 @@ void DbManager::initDbPath(const QString configPath)
     QDir dir;
     QString settingsDir = "";
 
+// set different folder name according to used OS
+#if defined(Q_OS_WIN)
+	QLatin1String dbFolder("Easysync");
+#elif defined(Q_OS_UNIX)
+	QLatin1String dbFolder(".easysync");
+#else
+    QLatin1String dbFolder("Easysync");
+#endif
+
     QFileInfo configInfo(configPath);
 
     //qDebug() << "Got" << configInfo.absoluteFilePath();
 
-    if (!configPath.isEmpty()/* && configInfo.exists()*/)
+    if (!configPath.isEmpty())
     {
         QSettings settings(configInfo.absoluteFilePath(), QSettings::IniFormat);
         dbPath = settings.value("dbPath").toString();
@@ -277,7 +300,7 @@ void DbManager::initDbPath(const QString configPath)
         {
             //qDebug() << "no dbPath";
             QtServiceBase::instance()->logMessage(QString("Failed to read dbPath from config file"));
-            settingsDir = QDir::homePath() + QDir::separator() + QLatin1String(".easysync");
+            settingsDir = QDir::homePath() + QDir::separator() + dbFolder;
             dbPath = settingsDir + QDir::separator() + QLatin1String("easysync.sqlite");
         }
         else
@@ -290,7 +313,7 @@ void DbManager::initDbPath(const QString configPath)
     }
     else
     {
-        settingsDir = QDir::homePath() + QDir::separator() + QLatin1String(".easysync");
+        settingsDir = QDir::homePath() + QDir::separator() + dbFolder;
         dir.mkpath(settingsDir);
 
         dbPath = settingsDir + QDir::separator() + QLatin1String("easysync.sqlite");

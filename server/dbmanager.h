@@ -1,9 +1,7 @@
 #ifndef DBMANAGER_H
 #define DBMANAGER_H
 
-//#include <QString>
 #include <QSqlDatabase>
-//#include <QList>
 
 QT_BEGIN_NAMESPACE
 class QSqlDatabase;
@@ -21,9 +19,11 @@ public:
     //! Return status of the connection to the database
     bool isConnected() const;
 
+    //! Create tables to store information about users and hosts. Does nothing if tables are already there.
     bool createTables();
     bool addUser(const QString &username);
     bool isUserValid(const QString &username);
+    //! Register new host (client) connected by socketId for a particular user username
     bool addHostname(const QString &username, const QString &hostname, const int socketId);
     //! Index of every connected client is stored in the database. This function voids this index for a particular hostname.
     void voidConnection(const QString &hostname);
