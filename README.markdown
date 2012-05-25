@@ -34,7 +34,7 @@ General instructions:
 
 Precompiled executable is available for Windows users. Please, refer to *client/INSTALL.win.markdown* file.
 
-** If you want to compile the client code on Windows please refer to the dedicated README file in *client* folder.**
+**If you want to compile the client code on Windows please refer to the dedicated README file in *client* folder.**
 
 Known Issues
 ============
