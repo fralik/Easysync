@@ -12,11 +12,11 @@
 #include <QtNetwork>
 #include <QtNetwork/QNetworkConfigurationManager>
 
-Client::Client(QWidget *parent) :
-    QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint),
-    ui(new Ui::Client),
-    syncInProgress(false),
-    needToSync(false)
+Client::Client(QWidget *parent)
+    : QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint)
+    , ui(new Ui::Client)
+    , syncInProgress(false)
+    , needToSync(false)
 {
     socketReady = false;
     keepAliveInterval = 60000; // 60 seconds
@@ -79,11 +79,9 @@ void Client::connectToServer()
     {
         server->abort();
         server->disconnectFromHost();
-        server->deleteLater();
     }
 
     qDebug() << "Trying to connect to the server";
-    server->abort();
     server->connectToHost(ui->serverAddressEdit->text(), ui->portEdit->text().toInt());
 
     QTimer::singleShot(2000, this, SLOT(checkServerConnection()));
@@ -198,6 +196,9 @@ void Client::sendKeepAlive()
 
 void Client::handleSyncIsFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    Q_UNUSED(exitCode);
+    Q_UNUSED(exitStatus);
+
     qDebug() << "finished to sync";
 
     setIcon(Easysync::ConnectedIcon);
@@ -243,18 +244,18 @@ void Client::checkSettings()
     else
     {
         // we have our settings, do not make additional checks
-        ui->usernameEdit->setText(name);
-        ui->hostnameEdit->setText(settings.value("account/hostname").toString()); // actually, we can remove this from settings
-        ui->serverAddressEdit->setText(settings.value("serverAddress").toString());
-        ui->syncdirEdit->setText(settings.value("syncdir").toString());
-        ui->unisonProfileEdit->setText(settings.value("unisonProfile").toString());
-        ui->portEdit->setText(settings.value("port").toString());
+        username = name;
+        hostname = settings.value("account/hostname").toString();
+        serverAddress = settings.value("serverAddress").toString();
+        syncDir = settings.value("syncdir").toString();
+        port = settings.value("port").toString();
 
-        username = ui->usernameEdit->text();
-        hostname = ui->hostnameEdit->text();
-        serverAddress = ui->serverAddressEdit->text();
-        port = ui->portEdit->text();
-        syncDir = ui->syncdirEdit->text();
+        ui->usernameEdit->setText(name);
+        ui->hostnameEdit->setText(hostname);
+        ui->serverAddressEdit->setText(serverAddress);
+        ui->syncdirEdit->setText(syncDir);
+        ui->unisonProfileEdit->setText(settings.value("unisonProfile").toString());
+        ui->portEdit->setText(port);
 
         connectToServer();
     }
@@ -456,6 +457,9 @@ void Client::setIcon(Easysync::AvailableIcons icon)
 
 void Client::installWatcher()
 {
+    if (syncDir.isEmpty())
+        return ;
+
 #if defined(Q_OS_WIN)
     watcher.addPath(syncDir);
 #else
@@ -465,6 +469,9 @@ void Client::installWatcher()
 
 void Client::stopWatcher()
 {
+    if (syncDir.isEmpty())
+        return ;
+
 #if defined(Q_OS_WIN)
     watcher.removePath(syncDir);
 #else

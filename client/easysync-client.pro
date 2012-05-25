@@ -9,7 +9,8 @@ win32 {
             qt/mfilesystemwatcher.cpp         
         HEADERS += qt/mfilesystemwatcher_win_p.h \
             qt/mfilesystemwatcher_p.h \
-            qt/mfilesystemwatcher.h 
+            qt/mfilesystemwatcher.h
+        INCLUDEPATH += $$(QT_SOURCE)\include
 }
 FORMS += \
     client.ui

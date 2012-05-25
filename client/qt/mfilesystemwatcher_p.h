@@ -57,7 +57,7 @@
 
 //#ifndef QT_NO_FILESYSTEMWATCHER
 
-#include <private/qobject_p.h>
+#include <QtCore/private/qobject_p.h>
 
 #include <QtCore/qstringlist.h>
 #include <QtCore/qthread.h>
